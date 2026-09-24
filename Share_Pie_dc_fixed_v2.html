@@ -674,6 +674,11 @@ class Component extends DCLogic {
     for (const x of arr) { try { out.push(fn(x)); } catch (err) { console.warn(`[${label}] 잘못된 항목을 건너뜀`, err.message, x); } }
     return out;
   }
+  // 같은 작업이 진행 중이면 막고, 막혔다는 걸 사용자에게 알려준다(연타 시 "안 눌렸나?" 방지).
+  claim(key){
+    if (this._inflight.has(key)) { this.showToast('처리 중이에요. 잠시만 기다려 주세요'); return false; }
+    this._inflight.add(key); return true;
+  }
   myUserId(){ return this.state.me ? this.state.me.userId : null; }
   friendIdByName(name){ const f = this.state.friends.find(x=>x.name===name); return f ? f.userId : null; }
   friendName(id){ const f = this.state.friends.find(x=>x.userId===id); return f ? f.name : id; }
@@ -796,8 +801,15 @@ class Component extends DCLogic {
     }
     if (out.total <= 0) throw this.userError('총 금액이 0원이에요. 금액을 다시 알려 주세요.');
     if (raw.mode === 'RATIO') {
-      out.ratios = {};
-      for (const id of participants) { const v = Number(raw.ratios && raw.ratios[id]); out.ratios[id] = isFinite(v) && v > 0 ? v : 0; }
+      // AI는 "사용자가 말한 비율"만 보낸다. 언급 안 된 사람은 남은 %를 코드가 균등하게 채운다.
+      const explicit = {};
+      for (const id of participants) { const v = Number(raw.ratios && raw.ratios[id]); if (isFinite(v) && v > 0) explicit[id] = v; }
+      const sum = Object.values(explicit).reduce((a, v) => a + v, 0);
+      if (sum > 100) throw this.userError(`비율 합이 ${sum}%예요. 100% 이하로 다시 말씀해 주세요.`);
+      const rest = participants.filter(id => !(id in explicit));
+      out.ratios = { ...explicit };
+      rest.forEach(id => { out.ratios[id] = (100 - sum) / rest.length; });
+      out.ratioExplicit = Object.keys(explicit);
     }
     if (raw.mode === 'ADJUST') {
       out.adjustments = {};
@@ -830,7 +842,7 @@ class Component extends DCLogic {
   // ============================================================
   componentDidMount(){ this._prev = this.state;
     this.fit(); this._r = () => this.fit(); window.addEventListener('resize', this._r);
-    this.later(() => this.setState({screen:'auth'}), 2400);
+    this.later(() => this.restoreSession(), 2400);
   }
   componentWillUnmount(){ this._unmounted = true; window.removeEventListener('resize', this._r); this._timers.forEach(clearTimeout); this._timers.clear(); }
   componentDidUpdate(){
@@ -1014,9 +1026,15 @@ class Component extends DCLogic {
 
     const participants = members.map(m => m.userId).filter(id => !excluded.has(id));
 
-    // 4) 남은 금액 → 총액 / 품목
+    // 4) 남은 금액 → 1인당 금액 / 총액 / 품목
     const free = amounts.filter(a => !a.used), items = [];
+    // "1만원씩", "인당 12,000원", "한 명당 5천원" → 1인당 금액(총액 아님)
     for (const a of free) {
+      const head = raw.slice(Math.max(0, a.start - 8), a.start), tail = raw.slice(a.end, a.end + 3);
+      if (/^\s*씩/.test(tail) || /(인당|명당|1인|각자|각각|사람당)\s*$/.test(head)) a.perPerson = true;
+    }
+    for (const a of free) {
+      if (a.perPerson) continue;
       const w = raw.slice(Math.max(0, a.start - 14), a.start).match(/([가-힣a-zA-Z][가-힣a-zA-Z0-9]{0,11})\s*$/);
       if (!w) continue;
       if (/^(총|합계|전체|총액|금액|합|전부|모두)$/.test(w[1])) { a.isTotal = true; continue; }
@@ -1031,17 +1049,20 @@ class Component extends DCLogic {
     if (items.length >= 2 && !hasAdjust && !hasRatio)
       return { intent:'SETTLEMENT', mode:'ITEM', itemName:'여러 품목', items: items.map(it => ({ ...it, participants:[...participants] })), participants, raw };
 
-    const totalAmt = free.find(a => a.isTotal) || free.reduce((b, a) => (!b || a.value > b.value) ? a : b, null);
-    const total = totalAmt ? totalAmt.value : null;
+    // 총액 우선순위: ① "총 X원" ② 1인당 금액 × 참여 인원 ③ 가장 큰 금액
+    const explicitTotal = free.find(a => a.isTotal);
+    const perPerson = free.find(a => a.perPerson);
+    const others = free.filter(a => !a.perPerson);
+    const total = explicitTotal ? explicitTotal.value
+      : perPerson ? perPerson.value * participants.length
+      : others.length ? others.reduce((b, a) => a.value > b ? a.value : b, 0) : null;
     const itemName = items.length === 1 ? items[0].name : '정산';
 
     if (hasRatio) {
       const named = Object.keys(ratios).filter(id => participants.includes(id));
       const namedSum = named.reduce((a, k) => a + ratios[k], 0);
       if (namedSum > 100) throw this.userError(`비율 합이 ${namedSum}%예요. 100% 이하로 다시 말씀해 주세요.`);
-      const rest = participants.filter(id => !named.includes(id)), out = {};
-      named.forEach(k => { out[k] = ratios[k]; });
-      rest.forEach(k => { out[k] = rest.length ? (100 - namedSum) / rest.length : 0; });
+      const out = {}; named.forEach(k => { out[k] = ratios[k]; });   // 언급된 비율만. 나머지 균등 배분은 코드(normalize)가 채운다
       return { intent:'SETTLEMENT', mode:'RATIO', itemName, total, ratios: out, participants, raw };
     }
     if (hasAdjust) return { intent:'SETTLEMENT', mode:'ADJUST', itemName, total, adjustments, participants, raw };
@@ -1075,6 +1096,7 @@ class Component extends DCLogic {
     if (!res || typeof res.token !== 'string' || !res.token) throw this.contractError('로그인 응답에 token이 없어요');
     const user = this.normalizeUser(res.user);
     this._token = res.token;
+    this.saveSession(res.token);
     const boot = await this.api('GET', '/bootstrap');
     this.applyBootstrap(user, boot);
     this.setState({screen:'main', tab:'home', authErr:''});
@@ -1098,7 +1120,18 @@ class Component extends DCLogic {
       newMembers: friends.slice(0, 3).map(f => f.userId),
     });
   }
-  resetUserData(){ this._token = null; this.setState({...this.EMPTY_USER_DATA(), overlay:null, panel:null, sheet:null, confirm:null, tab:'home'}); }
+  // 새로고침해도 로그인이 유지되도록 토큰만 sessionStorage에 둔다(탭을 닫으면 사라짐).
+  saveSession(token){ try { sessionStorage.setItem('sharepie_token', token); } catch (_) {} }
+  loadSession(){ try { return sessionStorage.getItem('sharepie_token'); } catch (_) { return null; } }
+  clearSession(){ try { sessionStorage.removeItem('sharepie_token'); } catch (_) {} }
+  async restoreSession(){
+    const token = this.loadSession();
+    if (!token) return this.setState({screen:'auth'});
+    this._token = token;
+    try { const res = await this.api('GET', '/me'); await this.afterLogin({ token, user:res.user }, '다시 로그인했어요'); }
+    catch (_) { this.clearSession(); this._token = null; this.setState({screen:'auth'}); }
+  }
+  resetUserData(){ this._token = null; this.clearSession(); this.setState({...this.EMPTY_USER_DATA(), overlay:null, panel:null, sheet:null, confirm:null, tab:'home'}); }
 
   // ============================================================
   // [8] Pie 채팅(홈) — 하드코딩 답변 제거, Kiln 응답 + 코드 계산
@@ -1148,6 +1181,7 @@ class Component extends DCLogic {
           if (cd.intent === 'SETTLEMENT') {
             const { results } = this.computeResults(cd);
             out.split = results.map(r => [r.name, r.amount]);
+            out.interp = cd;   // 그룹을 만들 때 멤버가 바뀌면 "같은 조건"으로 다시 계산하려고 보관
             out.groupName = String(m.settlement.groupName || cd.itemName || '새 정산');
           }
         } catch (err) {
@@ -1179,8 +1213,14 @@ class Component extends DCLogic {
     const gid = this.state.gchatId, g = this.state.groups.find(x=>x.id===gid); if (!g) return;
     const myMsg = { id:this.uid('m'), from:this.myUserId(), text:t };
     this.appendGroupMsg(gid, myMsg, { gchatInput:'' });
-    this.api('POST', `/groups/${encodeURIComponent(gid)}/messages`, { messageId:myMsg.id, text:t })
-      .catch(() => this.showToast('메시지 전송에 실패했어요'));
+    // 서버 저장이 끝난 뒤 해석한다(Kiln이 서버의 대화 기록을 참고해도 순서가 맞도록).
+    try { await this.api('POST', `/groups/${encodeURIComponent(gid)}/messages`, { messageId:myMsg.id, text:t }); }
+    catch (err) {
+      this.setState(s => ({ gchatInput: s.gchatInput || t,   // 입력창에 되돌려 다시 보내기 쉽게
+        groups: s.groups.map(g => g.id !== gid ? g : { ...g, msgs: g.msgs.filter(m => m.id !== myMsg.id)
+          .concat([this.sysMsg(`메시지를 보내지 못했어요 (${err.message}). 입력창에 다시 넣어 두었어요.`)]) }) }));
+      return;
+    }
     let cd;
     try { cd = await this.interpretForGroup(g, t); }
     catch (err) { return this.appendGroupMsg(gid, this.sysMsg(err.code==='USER' ? err.message : '조건을 이해하지 못했어요. 다시 설명해 주세요.')); }
@@ -1188,7 +1228,7 @@ class Component extends DCLogic {
     this.appendGroupMsg(gid, { id:this.uid('m'), from:'sys', kind:'confirm', confirmData:cd, resolved:false });
   };
   confirmSettlement = async (groupId, msgId) => {
-    const key = 'confirm:' + msgId; if (this._inflight.has(key)) return; this._inflight.add(key);
+    const key = 'confirm:' + msgId; if (!this.claim(key)) return;
     try {
       const g = this.state.groups.find(x=>x.id===groupId);
       const msg = g && g.msgs.find(m=>m.id===msgId); if (!msg || msg.resolved) return;
@@ -1222,7 +1262,7 @@ class Component extends DCLogic {
     const pid = this.state.productId, p = this.state.products[pid]; if (!p) return;
     if (this.state.joinedIds.includes(pid)) return this.showToast('이미 참여한 공동구매예요');
     if (p.joined >= p.cap) return this.showToast('모집이 마감됐어요');
-    const key = 'join:' + pid; if (this._inflight.has(key)) return; this._inflight.add(key);
+    const key = 'join:' + pid; if (!this.claim(key)) return;
     try {
       // TODO(PM 확인): 함께 살 친구 선택 UI가 없어 원본과 동일하게 친구 3명을 기본값으로 둔다.
       const memberIds = [this.myUserId(), ...this.state.friends.slice(0, 3).map(f => f.userId)];
@@ -1237,11 +1277,46 @@ class Component extends DCLogic {
     } catch (err) { this.showToast(err.message || '공동구매 참여에 실패했어요'); }
     finally { this._inflight.delete(key); }
   };
-  openCreate = (name, split) => {
-    const me = this.myUserId();
-    const ids = split ? split.map(r => this.friendIdByName(r[0])).filter(id => id && id !== me) : this.state.friends.slice(0,3).map(f=>f.userId);
-    this.setState({sheet:'create', newGroupName:name||'', newMembers:[...new Set(ids)], prefill: split||null, friendSearchQ:''});
+  // split: [[이름, 금액]], interp: 홈 채팅에서 받은 해석(이름 키). 없으면 빈 그룹 생성.
+  openCreate = (name, split, interp) => {
+    const me = this.state.me;
+    const ids = split ? split.map(r => this.friendIdByName(r[0])).filter(id => id && id !== me.userId) : this.state.friends.slice(0,3).map(f=>f.userId);
+    const unknown = split ? split.map(r => r[0]).filter(n => n !== me.name && !this.friendIdByName(n)) : [];
+    this.setState({sheet:'create', newGroupName:name||'', newMembers:[...new Set(ids)],
+      prefill: split ? { split, interp: interp || null } : null, friendSearchQ:''});
+    if (unknown.length) this.showToast(`${unknown.join(', ')}은(는) 친구 목록에서 직접 골라 주세요`);
   };
+  // 홈 채팅 해석(이름 키)을 실제 그룹 멤버(userId 키)로 옮긴다. 옮길 수 없는 조건은 dropped로 알려준다.
+  rebaseInterpretation(interp, memberIds, nameOf){
+    const idByName = new Map(memberIds.map(id => [nameOf(id), id]));
+    const dropped = [];
+    const mapKeys = obj => {
+      const out = {};
+      for (const [n, v] of Object.entries(obj || {})) { const id = idByName.get(n); if (id) out[id] = v; else dropped.push(n); }
+      return out;
+    };
+    const cd = { ...interp, participants:[...memberIds] };
+    if (interp.mode === 'ADJUST') cd.adjustments = mapKeys(interp.adjustments);
+    if (interp.mode === 'RATIO') {
+      // 사용자가 직접 말한 비율만 옮기고, 나머지 %는 새 멤버 구성으로 다시 균등 배분한다
+      const said = {};
+      for (const n of interp.ratioExplicit || []) said[n] = interp.ratios[n];
+      const explicit = mapKeys(said);
+      const sum = Object.values(explicit).reduce((a, v) => a + v, 0);
+      const rest = memberIds.filter(id => !(id in explicit));
+      cd.ratios = { ...explicit };
+      rest.forEach(id => { cd.ratios[id] = rest.length ? Math.max(0, 100 - sum) / rest.length : 0; });
+    }
+    if (interp.mode === 'ITEM') {
+      cd.items = interp.items.map(it => {
+        const everyone = it.participants.length === interp.participants.length;
+        const parts = everyone ? [...memberIds] : it.participants.map(n => idByName.get(n)).filter(Boolean);
+        if (!everyone) it.participants.filter(n => !idByName.has(n)).forEach(n => dropped.push(n));
+        return { ...it, participants: parts };
+      });
+    }
+    return { cd, dropped:[...new Set(dropped)] };
+  }
   openFriendSearch = () => this.setState({sheet:'friendSearch', friendSearchQ:''});
   closeFriendSearch = () => this.setState({sheet:'create'});
   generateInviteLink = async () => {
@@ -1269,31 +1344,43 @@ class Component extends DCLogic {
   closeEditField = () => this.setState({ sheet:'privacy' });
 
   createGroup = async () => {
-    if (this._inflight.has('createGroup')) return;
+    if (this._inflight.has('createGroup')) return this.showToast('처리 중이에요. 잠시만 기다려 주세요');
     const {newGroupName, newMembers, prefill} = this.state, me = this.state.me;
     const name = newGroupName.trim();
     if (!name) return this.showToast('그룹 이름을 입력해 주세요');
     const others = newMembers.filter(id => id !== me.userId);
     if (!others.length) return this.showToast('함께할 멤버를 1명 이상 선택해 주세요');
     const memberIds = [me.userId, ...others];
-    let initialShares = null;
+    let initialShares = null, notice = null;
     if (prefill) {
-      // Pie가 계산해 둔 결과: 멤버 구성이 같으면 그대로, 바뀌었으면 코드(calcEqual)로 다시 계산 — AI는 재계산하지 않는다.
+      // 멤버 구성이 같으면 Pie 결과 그대로. 바뀌었으면 "같은 정산 방식"으로 코드가 다시 계산한다(균등으로 몰래 바꾸지 않음).
       try {
-        const total = prefill.reduce((a,r)=>a+r[1],0);
+        const split = prefill.split, total = split.reduce((a,r)=>a+r[1],0);
         const nameOf = id => id === me.userId ? me.name : this.friendName(id);
-        const same = memberIds.length===prefill.length && memberIds.every(id => prefill.some(r => r[0]===nameOf(id)));
-        const results = same ? memberIds.map(id => ({ userId:id, amount: prefill.find(r => r[0]===nameOf(id))[1] }))
-                             : this.calcEqual(memberIds, total).map(r => ({ userId:r.name, amount:r.amount }));
-        initialShares = { total, results };
+        const same = memberIds.length===split.length && memberIds.every(id => split.some(r => r[0]===nameOf(id)));
+        let results;
+        if (same) {
+          results = memberIds.map(id => ({ userId:id, amount: split.find(r => r[0]===nameOf(id))[1] }));
+        } else if (prefill.interp) {
+          const { cd, dropped } = this.rebaseInterpretation(prefill.interp, memberIds, nameOf);
+          const calc = this.computeResults(cd);
+          results = calc.results.map(r => ({ userId:r.name, amount:r.amount }));
+          notice = `멤버가 바뀌어 같은 조건(${this.MODE_LABEL[cd.mode]})으로 다시 계산했어요 · 총 ${this.won(calc.total)}`
+            + (dropped.length ? `. ${dropped.join(', ')}의 개별 조건은 멤버에 없어 빠졌어요.` : '');
+        } else {
+          results = this.calcEqual(memberIds, total).map(r => ({ userId:r.name, amount:r.amount }));
+          notice = `멤버가 바뀌어 총 ${this.won(total)}을 균등 분배로 다시 계산했어요.`;
+        }
+        initialShares = { total: results.reduce((a,r)=>a+r.amount,0), results };
       } catch (err) { return this.showToast(err.message || '정산 계산 중 문제가 생겼어요'); }
     }
     this._inflight.add('createGroup');
     try {
       const res = await this.api('POST', '/groups', { name, memberIds, initialShares }, { idempotencyKey:this.uid('create') });
       const g = this.normalizeGroup(res.group);
+      if (notice) g.msgs = [...g.msgs, this.sysMsg(notice)];
       this.setState(s=>({groups:[g, ...s.groups.filter(x=>x.id!==g.id)], sheet:null, overlay:null, tab:'group', openGroup:g.id, prefill:null, friendSearchQ:''}));
-      this.showToast('그룹을 만들었어요');
+      this.showToast(notice ? '그룹을 만들었어요 · 분담액을 다시 계산했어요' : '그룹을 만들었어요');
     } catch (err) { this.showToast(err.message || '그룹을 만들지 못했어요'); }
     finally { this._inflight.delete('createGroup'); }
   };
@@ -1302,7 +1389,7 @@ class Component extends DCLogic {
   // [11] 승인 요청 / 정산 완료 — 역할 분리 + 중복 실행·잔액 방어
   // ============================================================
   remind = async (id) => {
-    const key = 'remind:' + id; if (this._inflight.has(key)) return; this._inflight.add(key);
+    const key = 'remind:' + id; if (!this.claim(key)) return;
     try {
       const res = await this.api('POST', `/groups/${encodeURIComponent(id)}/remind`, {});
       const ng = this.normalizeGroup(res.group);
@@ -1313,7 +1400,7 @@ class Component extends DCLogic {
     finally { this._inflight.delete(key); }
   };
   completeSettlement = async (id, snapshot) => {
-    const key = 'complete:' + id; if (this._inflight.has(key)) return; this._inflight.add(key);
+    const key = 'complete:' + id; if (!this.claim(key)) return;
     try {
       const g = snapshot || this.state.groups.find(x=>x.id===id); if (!g) return;
       if (g.status === 'COMPLETED') return;                       // 이미 완료 → 중복 차감 방지
@@ -1352,7 +1439,7 @@ class Component extends DCLogic {
     try { await this.api('DELETE','/me'); this.resetUserData(); this.setState({screen:'auth',authMode:'signup',email:'',name:''}); this.showToast('탈퇴가 완료됐어요'); }
     catch (err) { this.showToast(err.message || '탈퇴하지 못했어요'); }}});
   charge = async () => {
-    if (this._inflight.has('charge')) return; this._inflight.add('charge');
+    if (!this.claim('charge')) return;
     try {
       const res = await this.api('POST','/wallet/charge',{amount:50000},{idempotencyKey:this.uid('charge')});
       const payment = this.normalizePayment(res.payment);
@@ -1477,6 +1564,7 @@ class Component extends DCLogic {
     }
     if (key === 'POST /auth/logout') return { ok:true };
     if (key === 'DELETE /me') { this._mock = null; return { ok:true }; }
+    if (key === 'GET /me') { if (!this._token) throw this.mockErr('UNAUTHORIZED','다시 로그인해 주세요',401); return { user:db.me }; }
     if (key === 'PATCH /me') { Object.assign(db.me, body); return { user:db.me }; }
     if (key === 'GET /bootstrap') {
       const { me, idem, ...rest } = db; return rest;
@@ -1590,7 +1678,7 @@ class Component extends DCLogic {
     const mapMsg = (m) => ({...m, isUser:m.from==='user', isBot:m.from==='bot', hasCompare:!!(m.compare&&m.compare.length), hasSplit:!!m.split,
       compareItems:(m.compare||[]).filter(id=>P[id]).map((id,i)=>{const p=P[id]; return {name:p.name,cat:p.cat,tint:p.tint,letter:'ABC'[i],price:won(p.price),per:'약 '+won(p.price/(m.n||4)),deadline:p.deadline,recruit:`${p.joined}/${p.cap}명`,isBest:m.best===id,border:m.best===id?'#EE6A26':'#EEE1CB',onPick:()=>this.openProduct(id)};}),
       splitRows:(m.split||[]).map(([name,a])=>({name,amt:won(a)})), splitTotal:m.split?won(m.split.reduce((a,r)=>a+r[1],0)):'',
-      onSettle:()=>this.openCreate(m.groupName, m.split)});
+      onSettle:()=>this.openCreate(m.groupName, m.split, m.interp)});
     const pill = {COMPLETED:['#E1F0E4','#2F6B45'],PENDING_APPROVAL:['#FDEBC8','#7A4E08'],PAYING:['#FCE3D3','#A8481A'],AWAITING_COST:['#F1E8DA','#6E5A4A']};
     const groupList = s.groups.map(g=>{
       const ap = g.members.filter(m=>m.approved).length, total = g.members.reduce((a,m)=>a+m.share,0), exp = s.openGroup===g.id, n = g.members.length;
@@ -1718,7 +1806,7 @@ class Component extends DCLogic {
       friendSearchEmpty:friendsFiltered.length===0,
       generateInviteLink:this.generateInviteLink, hasInviteLink:!!s.inviteLink, inviteLink:s.inviteLink||'',
       copyInviteLink:()=>{ if(s.inviteLink){ if(typeof navigator!=='undefined'&&navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(s.inviteLink).catch(()=>{}); this.showToast('링크를 복사했어요'); } },
-      hasPrefill:!!s.prefill, prefillTotal:s.prefill?won(s.prefill.reduce((a,r)=>a+r[1],0)):'', createGroup:this.createGroup, createBg:s.newGroupName.trim()?'#EE6A26':'#E3C4AE',
+      hasPrefill:!!s.prefill, prefillTotal:s.prefill?won(s.prefill.split.reduce((a,r)=>a+r[1],0)):'', createGroup:this.createGroup, createBg:s.newGroupName.trim()?'#EE6A26':'#E3C4AE',
       showChatHint: !s.prefill,
       draftName:s.draftName, onDraftName:e=>this.setState({draftName:e.target.value}),
       avatarPreview:s.draftAvatar||'', hasAvatarPreview:!!s.draftAvatar, noAvatarPreview:!s.draftAvatar,
