@@ -51,6 +51,8 @@
 
 모호한 조건은 AI가 임의로 정하지 않고 되묻는다 (예: "'조금 더'가 정확히 몇 %인가요?").
 
+**조건이 대화 중에 바뀌는 경우 (다턴 처리)**: 사용자가 "아, 진주는 5천원 적게 내자"처럼 조건을 도중에 수정하면, AI(Stage 1)는 매 턴마다 최신 상태를 반영한 새 JSON을 다시 만들어 Stage 2로 넘긴다. **Stage 2의 계산 로직(코드) 자체는 절대 바뀌지 않는다** — 매번 "그 시점의 JSON을 정확히 계산한다"는 동일한 함수를 그대로 재실행할 뿐이다. 즉 유연하게 바뀌는 것은 AI가 넘기는 입력(JSON)이고, 고정된 것은 그 입력을 처리하는 계산 로직이다.
+
 ## 4. Kiln API 연동 스펙 (확정된 값 — 임의로 바꾸지 말 것)
 
 ```
@@ -77,7 +79,7 @@ Stage 2(계산)는 Kiln API를 호출하지 않는다. 토큰 로그에 `settlem
 | 함수 | 파라미터(개념) | 역할 | 우선순위 |
 |---|---|---|:---:|
 | `charge_token` | user_address, amount | PieCoin 발급(충전) | ★ 코어 |
-| `lock_for_settlement` | settlement_id, participant, amount | 승인 시 분담금 잠금 | ★ 코어 |
+| `lock_for_settlement` | settlement_id, participant, amount | 승인 시 분담금 잠금. **참여자의 PieCoin 잔액이 amount보다 적으면 잠금을 거부하고 에러를 반환한다 (잔액 부족 시 정산 자체가 진행되지 않음 — 일부만 잠기는 상태를 절대 허용하지 않는다).** | ★ 코어 |
 | `release_to_recipient` | settlement_id, recipient | 전원 승인 완료 시 잠긴 금액 지급 | ★ 코어 |
 | `refund_participant` | settlement_id, participant | 착오 판정 시 자동 환불 | Dispute 모듈 |
 | `raise_dispute` | settlement_id, reason | 이의제기 접수 | Dispute 모듈 |
@@ -152,3 +154,4 @@ CONTRACT_ADDRESS=<배포 후 입력>
 - Kiln API 호출에서 토큰 로깅을 생략하지 않는다
 - 이의제기 판정 카테고리를 3개 밖으로 늘리지 않는다
 - 메인넷/실제 결제 코드를 작성하지 않는다
+- `lock_for_settlement`에서 잔액 확인을 생략하지 않는다 — 잔액 부족 시 정산이 진행되면 안 된다
