@@ -243,16 +243,17 @@ input::placeholder{color:#A8927F}
 <sc-if value="{{ isMy }}">
 <div data-screen-label="07 My" style="padding:4px 20px 28px;display:flex;flex-direction:column;gap:14px;animation:spFade .35s ease both">
 <div style="display:flex;align-items:center;gap:14px;padding:6px 2px">
-<div style="width:60px;height:60px;border-radius:30px;background:#FDEBC8;display:grid;place-items:center;font-weight:800;font-size:22px;color:#A8481A">{{ initial }}</div>
-<div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-weight:800;font-size:19px">{{ userName }}</span><span style="font-size:13px;color:#7A6353">{{ userEmail }}</span></div>
-<button onClick="{{ openProfile }}" style="height:34px;padding:0 12px;border:1px solid #EEE1CB;border-radius:10px;background:#FFFCF6;font:600 13px Pretendard,sans-serif;color:#2E1D12;cursor:pointer">프로필 편집</button>
+<sc-if value="{{ hasHeaderAvatar }}"><img src="{{ headerAvatarUrl }}" alt="" style="width:60px;height:60px;border-radius:30px;object-fit:cover;flex:none"></sc-if>
+<sc-if value="{{ noHeaderAvatar }}"><div style="width:60px;height:60px;border-radius:30px;background:#FDEBC8;display:grid;place-items:center;font-weight:800;font-size:22px;color:#A8481A;flex:none">{{ initial }}</div></sc-if>
+<div style="flex:1;display:flex;flex-direction:column;gap:3px"><span style="font-weight:800;font-size:19px">{{ userName }}</span><span style="font-size:13px;color:#7A6353">{{ userAddress }}</span></div>
 </div>
-<div style="background:#EE6A26;border-radius:22px;padding:20px;color:#fff;display:flex;flex-direction:column;gap:16px">
-<div style="display:flex;justify-content:space-between;align-items:center"><span style="font-weight:700;font-size:15px">파이페이</span><span style="font-size:12px;color:#FFF3E8">연결 계좌 · 토스뱅크 ****21</span></div>
-<span style="font-weight:800;font-size:32px;letter-spacing:-0.03em">{{ balanceStr }}</span>
-<div style="display:flex;gap:8px">
-<button onClick="{{ charge }}" style="flex:1;height:42px;border:none;border-radius:12px;background:#FFFCF6;color:#C9531A;font:700 14px Pretendard,sans-serif;cursor:pointer">충전</button>
-<button onClick="{{ sendMoney }}" style="flex:1;height:42px;border:none;border-radius:12px;background:#C9531A;color:#fff;font:700 14px Pretendard,sans-serif;cursor:pointer">송금</button>
+<div style="background:linear-gradient(135deg, #EE6A26 0%, #F5A24C 100%);border-radius:22px;padding:20px;color:#fff;display:flex;flex-direction:column;gap:14px">
+<span style="font-weight:700;font-size:15px">Pie Pay 잔액</span>
+<span style="font-weight:800;font-size:34px;letter-spacing:-0.03em">{{ balanceStr }}</span>
+<span style="font-size:13px;color:#FFF3E8">연결계좌 · 국민은행 ****1234</span>
+<div style="display:flex;gap:8px;margin-top:2px">
+<button onClick="{{ charge }}" style="flex:1;height:44px;border:none;border-radius:12px;background:#FFFCF6;color:#C9531A;font:700 14px Pretendard,sans-serif;cursor:pointer">충전하기</button>
+<button onClick="{{ sendMoney }}" style="flex:1;height:44px;border:1.5px solid rgba(255,255,255,.75);border-radius:12px;background:transparent;color:#fff;font:700 14px Pretendard,sans-serif;cursor:pointer">연결계좌 관리</button>
 </div>
 </div>
 <div style="background:#FFFCF6;border:1px solid #EEE1CB;border-radius:20px;padding:6px 16px">
@@ -350,6 +351,39 @@ input::placeholder{color:#A8927F}
 <sc-if value="{{ m.isSys }}"><div style="align-self:center;max-width:90%;background:#FDEBC8;color:#6B4210;border-radius:14px;padding:9px 14px;font-size:13px;line-height:1.5;text-align:center;display:flex;gap:8px;align-items:center;animation:spFade .25s ease both"><img src="assets/pie-bot.png" alt="" style="width:22px;height:22px;object-fit:cover;transform:scale(1.5);mix-blend-mode:multiply;flex:none">{{ m.text }}</div></sc-if>
 <sc-if value="{{ m.isMe }}"><div style="align-self:flex-end;max-width:78%;background:#EE6A26;color:#fff;padding:10px 14px;border-radius:18px 18px 4px 18px;font-size:15px;line-height:1.5;animation:spFade .25s ease both">{{ m.text }}</div></sc-if>
 <sc-if value="{{ m.isOther }}"><div style="display:flex;gap:8px;align-items:flex-start;animation:spFade .25s ease both"><div style="width:32px;height:32px;flex:none;border-radius:16px;background:{{ m.bg }};display:grid;place-items:center;font-size:10px;font-weight:700;color:#5E3A22">{{ m.from }}</div><div style="display:flex;flex-direction:column;gap:3px;max-width:75%"><span style="font-size:12px;color:#7A6353">{{ m.from }}</span><div style="background:#FFFCF6;border:1px solid #EEE1CB;padding:10px 14px;border-radius:4px 18px 18px 18px;font-size:15px;line-height:1.5">{{ m.text }}</div></div></div></sc-if>
+<sc-if value="{{ m.isGuide }}">
+<div style="align-self:center;width:92%;background:#FFFCF6;border:1.5px solid #F1C9A8;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:spFade .25s ease both">
+<div style="display:flex;align-items:center;gap:8px"><img src="assets/pie-bot.png" alt="" style="width:22px;height:22px;object-fit:cover;transform:scale(1.5);mix-blend-mode:multiply;flex:none"><span style="font-weight:800;font-size:13px;color:#5E3A12">Pie mate</span></div>
+<span style="font-size:13px;line-height:1.55;color:#5E4A3B">정산 조건을 아래 항목에 맞춰 편하게 말씀해 주세요.</span>
+<div style="display:flex;flex-direction:column;gap:4px;font-size:13px;color:#5E4A3B">
+<span>· 분배 항목 — 무엇에 대한 비용인가요? (예: 삼겹살, 숙소비)</span>
+<span>· 금액 — 총 얼마인가요?</span>
+<span>· 분배 인원 — 누가 나눠 내나요? (기본은 전원, "OO 빼고"도 가능)</span>
+<span>· 분배 방식 — 균등 / 비율(%) / 항목별 / 특정 인원만 더·덜 내기 중 어떤 방식인가요?</span>
+</div>
+<div style="background:#FDEBC8;border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.6;color:#6B4210">예시<br>"삼겹살 35900원 다같이 나눠줘"<br>"숙소비 200000원 진우 60% 나머지 나눠줘"<br>"삼겹살 35900원, 진주는 5000원 적게 내고 나머지 나눠줘"</div>
+</div>
+</sc-if>
+<sc-if value="{{ m.isConfirm }}">
+<div style="align-self:center;width:92%;background:#FFFCF6;border:1.5px solid #F1C9A8;border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px;animation:spFade .25s ease both">
+<div style="display:flex;align-items:center;gap:8px"><img src="assets/pie-bot.png" alt="" style="width:22px;height:22px;object-fit:cover;transform:scale(1.5);mix-blend-mode:multiply;flex:none"><span style="font-weight:800;font-size:13px;color:#5E3A12">Pie가 이렇게 이해했어요</span></div>
+<div style="display:flex;flex-direction:column;gap:5px;font-size:13px;color:#5E4A3B">
+<div style="display:flex;justify-content:space-between"><span style="color:#7A6353">항목</span><span style="font-weight:700">{{ m.confirmItemName }}</span></div>
+<div style="display:flex;justify-content:space-between"><span style="color:#7A6353">총 금액</span><span style="font-weight:700">{{ m.confirmTotal }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:10px"><span style="color:#7A6353;flex:none">참여자</span><span style="font-weight:700;text-align:right">{{ m.confirmParticipants }}</span></div>
+<div style="display:flex;justify-content:space-between"><span style="color:#7A6353">방식</span><span style="font-weight:700">{{ m.confirmModeLabel }}</span></div>
+</div>
+<sc-if value="{{ m.hasConfirmDetail }}"><div style="display:flex;flex-direction:column;gap:2px;background:#FBF4E6;border-radius:10px;padding:8px 10px"><sc-for list="{{ m.confirmDetailLines }}" as="dl"><span style="font-size:12px;color:#5E4A3B">{{ dl }}</span></sc-for></div></sc-if>
+<sc-if value="{{ m.confirmPending }}">
+<span style="font-size:12px;color:#7A6353">이대로 정산을 시작할까요?</span>
+<div style="display:flex;gap:8px">
+<button onClick="{{ m.onConfirmNo }}" style="flex:1;height:40px;border:1px solid #EEE1CB;border-radius:11px;background:transparent;font:700 13px Pretendard,sans-serif;color:#7A6353;cursor:pointer">다시 설명할게요</button>
+<button onClick="{{ m.onConfirmYes }}" style="flex:1;height:40px;border:none;border-radius:11px;background:#EE6A26;color:#fff;font:700 13px Pretendard,sans-serif;cursor:pointer">확인 · 정산 시작</button>
+</div>
+</sc-if>
+<sc-if value="{{ m.confirmResolved }}"><span style="font-size:12px;font-weight:700;color:{{ m.confirmStatusColor }}">{{ m.confirmStatusText }}</span></sc-if>
+</div>
+</sc-if>
 </sc-for>
 </div>
 <div style="flex:none;padding:10px 12px 30px;border-top:1px solid #EEE1CB;background:#FFFCF6;display:flex;gap:8px;align-items:center">
@@ -465,44 +499,7 @@ input::placeholder{color:#A8927F}
 <sc-if value="{{ hasSelectedFriends }}"><div style="display:flex;flex-wrap:wrap;gap:8px"><sc-for list="{{ selectedFriendChips }}" as="f"><button onClick="{{ f.remove }}" style="height:34px;padding:0 10px 0 14px;border:1.5px solid #F1C9A8;border-radius:17px;background:#FCE3D3;font:600 13px Pretendard,sans-serif;color:#A8481A;cursor:pointer;display:flex;align-items:center;gap:6px">{{ f.name }}<span style="font-size:15px;line-height:1">×</span></button></sc-for></div></sc-if>
 </div>
 <sc-if value="{{ hasPrefill }}"><div style="background:#FDEBC8;border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.5;color:#5E3A12">Pie가 계산한 총 {{ prefillTotal }}이 함께 전달돼요. 멤버를 바꾸면 균등 분담으로 다시 계산돼요.</div></sc-if>
-
-<sc-if value="{{ showModePicker }}">
-<div style="display:flex;flex-direction:column;gap:10px">
-<span style="font-size:13px;font-weight:600;color:#7A6353">정산 방식</span>
-<div style="display:flex;background:#F1E6D3;border-radius:14px;padding:4px">
-<button onClick="{{ setModeEqual }}" style="flex:1;height:38px;border:none;border-radius:11px;font:700 13px Pretendard,sans-serif;cursor:pointer;background:{{ modeEqualBg }};color:{{ modeEqualFg }}">균등 분배</button>
-<button onClick="{{ setModeRatio }}" style="flex:1;height:38px;border:none;border-radius:11px;font:700 13px Pretendard,sans-serif;cursor:pointer;background:{{ modeRatioBg }};color:{{ modeRatioFg }}">비율 분배</button>
-<button onClick="{{ setModeItem }}" style="flex:1;height:38px;border:none;border-radius:11px;font:700 13px Pretendard,sans-serif;cursor:pointer;background:{{ modeItemBg }};color:{{ modeItemFg }}">항목별 분배</button>
-</div>
-
-<sc-if value="{{ showTotalInput }}">
-<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600;color:#7A6353">총 금액</span><input value="{{ newTotalInput }}" onChange="{{ onNewTotalInput }}" placeholder="예: 40000 또는 4만원" inputmode="numeric" style="height:50px;border:1.5px solid #EEE1CB;border-radius:14px;padding:0 14px;font:500 15px Pretendard,sans-serif;background:#FBF4E6;color:#2E1D12;outline:none" style-focus="border-color:#EE6A26"></div>
-</sc-if>
-
-<sc-if value="{{ isRatioMode }}">
-<div style="display:flex;flex-direction:column;gap:6px">
-<span style="font-size:12px;color:#A8927F">비율은 %로 입력해요 (합계가 100이 아니어도 자동으로 비례 계산돼요)</span>
-<sc-for list="{{ ratioMembers }}" as="r"><div style="display:flex;align-items:center;gap:10px"><span style="flex:1;font-size:14px;font-weight:600">{{ r.name }}</span><input value="{{ r.value }}" onChange="{{ r.onChange }}" placeholder="0" inputmode="numeric" style="width:88px;height:44px;border:1.5px solid #EEE1CB;border-radius:12px;padding:0 12px;text-align:right;font:600 15px Pretendard,sans-serif;background:#FBF4E6;color:#2E1D12;outline:none" style-focus="border-color:#EE6A26"><span style="font-size:14px;color:#7A6353;width:14px">%</span></div></sc-for>
-</div>
-</sc-if>
-
-<sc-if value="{{ isItemMode }}">
-<div style="display:flex;flex-direction:column;gap:12px">
-<sc-for list="{{ itemRows }}" as="it">
-<div style="display:flex;flex-direction:column;gap:8px;border:1px solid #EEE1CB;border-radius:14px;padding:12px;background:#FFFCF6">
-<div style="display:flex;gap:8px">
-<input value="{{ it.name }}" onChange="{{ it.onName }}" placeholder="품목명 (예: 삼겹살)" style="flex:1;height:44px;border:1.5px solid #EEE1CB;border-radius:12px;padding:0 12px;font:500 14px Pretendard,sans-serif;background:#FBF4E6;color:#2E1D12;outline:none" style-focus="border-color:#EE6A26">
-<input value="{{ it.price }}" onChange="{{ it.onPrice }}" placeholder="금액" inputmode="numeric" style="width:110px;height:44px;border:1.5px solid #EEE1CB;border-radius:12px;padding:0 12px;text-align:right;font:500 14px Pretendard,sans-serif;background:#FBF4E6;color:#2E1D12;outline:none" style-focus="border-color:#EE6A26">
-</div>
-<div style="display:flex;flex-wrap:wrap;gap:6px"><sc-for list="{{ it.participants }}" as="pt"><button onClick="{{ pt.toggle }}" style="height:32px;padding:0 12px;border:1.5px solid {{ pt.border }};border-radius:16px;background:{{ pt.bg }};font:600 12px Pretendard,sans-serif;color:{{ pt.fg }};cursor:pointer">{{ pt.name }}</button></sc-for></div>
-<sc-if value="{{ it.canRemove }}"><button onClick="{{ it.remove }}" style="align-self:flex-end;height:28px;border:none;background:transparent;color:#A8481A;font:600 12px Pretendard,sans-serif;cursor:pointer;text-decoration:underline">이 품목 삭제</button></sc-if>
-</div>
-</sc-for>
-<button onClick="{{ addItemRow }}" style="height:44px;border:1.5px dashed #F1B48C;border-radius:12px;background:#FFF7EE;color:#C9531A;font:700 13px Pretendard,sans-serif;cursor:pointer">+ 품목 추가</button>
-</div>
-</sc-if>
-</div>
-</sc-if>
+<sc-if value="{{ showChatHint }}"><div style="background:#FDEBC8;border-radius:14px;padding:12px 14px;font-size:13px;line-height:1.5;color:#5E3A12">그룹을 만들면 Pie mate가 정산 조건을 어떻게 알려주면 되는지 채팅으로 안내해 드려요.</div></sc-if>
 
 <button onClick="{{ createGroup }}" style="height:54px;border:none;border-radius:14px;background:{{ createBg }};color:#fff;font:700 17px Pretendard,sans-serif;cursor:pointer">그룹 만들고 정산 시작</button>
 </div>
@@ -538,19 +535,51 @@ input::placeholder{color:#A8927F}
 <sc-if value="{{ isProfileSheet }}">
 <div style="display:flex;flex-direction:column;gap:14px">
 <span style="font-weight:800;font-size:21px">프로필 편집</span>
-<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600;color:#7A6353">이름</span><input value="{{ draftName }}" onChange="{{ onDraftName }}" style="height:50px;border:1.5px solid #EEE1CB;border-radius:14px;padding:0 14px;font:500 15px Pretendard,sans-serif;background:#FBF4E6;color:#2E1D12;outline:none" style-focus="border-color:#EE6A26"></div>
-<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600;color:#7A6353">우리 동네</span><div style="height:50px;border-radius:14px;padding:0 14px;background:#FBF4E6;display:flex;align-items:center;justify-content:space-between;font-size:15px">서울 성동구 성수동<span style="font-size:13px;color:#C9531A;font-weight:600">인증됨</span></div></div>
-<button onClick="{{ saveProfile }}" style="height:54px;border:none;border-radius:14px;background:#EE6A26;color:#fff;font:700 17px Pretendard,sans-serif;cursor:pointer">저장</button>
+<div style="display:flex;flex-direction:column;align-items:center;gap:10px;padding:2px 0 6px">
+<div style="position:relative;width:96px;height:96px">
+<sc-if value="{{ hasAvatarPreview }}"><img src="{{ avatarPreview }}" alt="" style="width:96px;height:96px;border-radius:48px;object-fit:cover;border:1.5px solid #EEE1CB"></sc-if>
+<sc-if value="{{ noAvatarPreview }}"><div style="width:96px;height:96px;border-radius:48px;background:#FDEBC8;display:grid;place-items:center;font-weight:800;font-size:32px;color:#A8481A">{{ avatarInitial }}</div></sc-if>
+<label for="avatarFileInput" style="position:absolute;right:0;bottom:0;width:32px;height:32px;border-radius:16px;background:#EE6A26;border:2px solid #FFFCF6;display:grid;place-items:center;cursor:pointer">
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>
+</label>
+</div>
+<input type="file" id="avatarFileInput" accept="image/*" onChange="{{ onAvatarFile }}" style="display:none">
+<sc-if value="{{ hasAvatarPreview }}"><button onClick="{{ resetAvatar }}" style="border:none;background:transparent;font:600 13px Pretendard,sans-serif;color:#7A6353;cursor:pointer;text-decoration:underline">기본 이미지로 변경</button></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="font-size:13px;font-weight:600;color:#7A6353">이름</span>
+<input value="{{ draftName }}" onChange="{{ onDraftName }}" maxlength="12" style="height:50px;border:1.5px solid {{ nickBorderColor }};border-radius:14px;padding:0 14px;font:500 15px Pretendard,sans-serif;background:#FBF4E6;color:#2E1D12;outline:none" style-focus="border-color:#EE6A26">
+<div style="display:flex;justify-content:space-between;font-size:12px"><span style="color:{{ nickHelpColor }}">{{ nickHelpText }}</span><span style="color:#A8927F">{{ nickLen }}</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px"><span style="font-size:13px;font-weight:600;color:#7A6353">우리 동네</span><div style="height:50px;border-radius:14px;padding:0 14px;background:#FBF4E6;display:flex;align-items:center;justify-content:space-between;font-size:15px">{{ userAddress }}<span style="font-size:13px;color:#C9531A;font-weight:600">인증됨</span></div></div>
+<button onClick="{{ saveProfile }}" style="height:54px;border:none;border-radius:14px;background:{{ saveProfileBg }};color:#fff;font:700 17px Pretendard,sans-serif;cursor:pointer">완료</button>
 </div>
 </sc-if>
 
 <sc-if value="{{ isPrivacySheet }}">
 <div style="display:flex;flex-direction:column;gap:4px">
 <span style="font-weight:800;font-size:21px;margin-bottom:10px">개인정보 관리</span>
-<sc-for list="{{ privacyRows }}" as="r"><div style="display:flex;justify-content:space-between;align-items:center;height:50px;border-bottom:1px solid #F1E6D3;font-size:15px"><span style="color:#7A6353">{{ r.k }}</span><span style="font-weight:600">{{ r.v }}</span></div></sc-for>
+<sc-for list="{{ privacyRows }}" as="r">
+<sc-if value="{{ r.editable }}"><button onClick="{{ r.go }}" style="width:100%;text-align:left;border:none;background:transparent;display:flex;justify-content:space-between;align-items:center;height:50px;border-bottom:1px solid #F1E6D3;font-size:15px;cursor:pointer;font-family:inherit;color:inherit" style-hover="background:#F9F1E3"><span style="color:#7A6353">{{ r.k }}</span><span style="display:flex;align-items:center;gap:6px;font-weight:600">{{ r.v }}<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C4B09A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"></path></svg></span></button></sc-if>
+<sc-if value="{{ r.notEditable }}"><div style="display:flex;justify-content:space-between;align-items:center;height:50px;border-bottom:1px solid #F1E6D3;font-size:15px"><span style="color:#7A6353">{{ r.k }}</span><span style="font-weight:600">{{ r.v }}</span></div></sc-if>
+</sc-for>
 <div style="display:flex;justify-content:space-between;align-items:center;height:56px;border-bottom:1px solid #F1E6D3;font-size:15px"><span style="color:#7A6353">마케팅 정보 수신</span><button onClick="{{ toggleMarketing }}" style="width:50px;height:30px;border:none;border-radius:15px;background:{{ mkBg }};padding:3px;cursor:pointer;display:flex;justify-content:{{ mkJustify }};transition:background .2s"><span style="width:24px;height:24px;border-radius:12px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span></button></div>
 <button onClick="{{ downloadData }}" style="height:50px;margin-top:10px;border:1px solid #EEE1CB;border-radius:14px;background:transparent;font:600 14px Pretendard,sans-serif;color:#2E1D12;cursor:pointer">내 정산 데이터 내려받기</button>
 <button onClick="{{ downloadData }}" style="height:44px;border:none;background:transparent;font:600 13px Pretendard,sans-serif;color:#7A6353;cursor:pointer;text-decoration:underline">개인정보 처리방침 보기</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isEditFieldSheet }}">
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:center;gap:10px">
+<button onClick="{{ closeEditField }}" style="width:36px;height:36px;border:none;background:transparent;border-radius:18px;display:grid;place-items:center;cursor:pointer;color:#2E1D12"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg></button>
+<span style="font-weight:800;font-size:20px;letter-spacing:-0.02em">{{ editFieldLabel }} 변경</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<input value="{{ editFieldDraft }}" onChange="{{ onEditFieldDraft }}" type="{{ editFieldInputType }}" placeholder="{{ editFieldPlaceholder }}" style="height:50px;border:1.5px solid {{ editFieldBorderColor }};border-radius:14px;padding:0 14px;font:500 15px Pretendard,sans-serif;background:#FBF4E6;color:#2E1D12;outline:none" style-focus="border-color:#EE6A26">
+<sc-if value="{{ hasEditFieldErr }}"><span style="font-size:12px;color:#B8401A;padding:0 4px">{{ editFieldErr }}</span></sc-if>
+</div>
+<button onClick="{{ saveEditField }}" style="height:54px;border:none;border-radius:14px;background:{{ editFieldSaveBg }};color:#fff;font:700 17px Pretendard,sans-serif;cursor:pointer">저장</button>
 </div>
 </sc-if>
 </div>
@@ -599,8 +628,9 @@ class Component extends DCLogic {
     tab:'home', homeInput:'', buyInput:'', overlay:null, chatId:null, chatInput:'', typing:false,
     panel:null, searchQ:'', sheet:null, productId:null, openGroup:'g1', gchatId:null, gchatInput:'',
     docId:null, settleSeg:'cert', confirm:null, toast:'', newGroupName:'', newMembers:['진우','민재','지현'], prefill:null,
-    newMode:'EQUAL', newTotalInput:'', newRatios:{}, newItems:[], showAllChats:false, friendSearchQ:'', inviteLink:null, payVisibleCount:5,
-    userName:'김진주', userEmail:'jinju@sharepie.app', draftName:'', marketing:true, balance:128400, scale:1,
+    showAllChats:false, friendSearchQ:'', inviteLink:null, payVisibleCount:5,
+    userName:'김진주', userEmail:'jinju@sharepie.app', userPhone:'010-2841-5920', userAddress:'서울 성동구 성수동', draftName:'', avatarUrl:null, draftAvatar:null, marketing:true, balance:128400, scale:1,
+    editField:null, editFieldDraft:'',
     chats:[
       {id:'c1',title:'자취방 고기 공동구매 비교',date:'9월 21일',summary:'4명 · 1인 1만원 조건으로 삼겹살·목살·혼합세트를 비교했어요. 목살 1.5kg이 예산 안에서 양이 가장 넉넉해요.',msgs:[
         {from:'user',text:'학교 친구들이랑 자취방에서 먹을 고기 사고 싶은데 4명이고 한 명당 만 원 정도였으면 좋겠어.'},
@@ -765,6 +795,87 @@ class Component extends DCLogic {
     const sum = results.reduce((a, r) => a + r.amount, 0);
     if (sum !== total) throw new Error(`계산 합계(${sum})가 총액(${total})과 일치하지 않아요.`);
   }
+  // "진주는 5000원 적게 내고 나머지가 나눠줘" 같은 차등(가감) 분배.
+  // n*X + sum(deltas) = total 이 되도록 공통값 X를 구한 뒤 각자에게 delta를 더한다.
+  calcAdjust(members, adjustments, total){
+    this.assertValidMembers(members);
+    if (typeof total !== 'number' || !isFinite(total) || total < 0) throw new Error('총 금액이 올바르지 않아요.');
+    const sumDeltas = members.reduce((a, m) => a + (adjustments && adjustments[m] ? Number(adjustments[m]) : 0), 0);
+    const X = (total - sumDeltas) / members.length;
+    const raw = members.map(name => ({ name, raw: X + (adjustments && adjustments[name] ? Number(adjustments[name]) : 0) }));
+    if (raw.some(r => r.raw < 0)) throw new Error('조정 금액이 총액보다 커서 계산할 수 없어요.');
+    const results = this.distributeRemainder(raw, total, 1);
+    this.assertSumMatches(results, total);
+    return results;
+  }
+
+  // ============================================================
+  // 정산 조건 자연어 해석 (Stage 1: AI 역할 — 여기서는 규칙 기반으로 흉내낸 것.
+  // 실제 Kiln API 연동 시 이 함수를 그 호출로 교체하면 된다. 이 함수는 "이해"만
+  // 하고, 실제 금액 계산은 절대 하지 않는다 — 계산은 항상 calcEqual 등 Stage2가 담당)
+  // ============================================================
+  parseSettlementText(text, members){
+    const raw = (text || '').trim();
+
+    // 참여자: 기본 전원, "이름(+조사) 빼고/제외"가 있으면 제외
+    // 이름 뒤에 "이는", "이", "은/는" 같은 조사가 붙어도 인식하도록 gap을 넉넉히 허용한다.
+    let participants = [...members];
+    members.forEach(m => {
+      if (new RegExp(`${m}[\\s\\S]{0,6}?(빼고|제외하고|제외)`).test(raw)) {
+        participants = participants.filter(x => x !== m);
+      }
+    });
+
+    // 품목 후보: "단어 12345원" 형태의 순수 숫자 금액. 참여자 이름 + 금액(예: "진주 5000원")은
+    // 개인 가감 표현일 수 있으므로 품목 후보에서 제외한다.
+    const itemRegex = /([가-힣a-zA-Z0-9]{1,12})\s*([0-9][0-9,]*)\s*원/g;
+    const items = [];
+    let m;
+    while ((m = itemRegex.exec(raw)) !== null) {
+      // "진주는", "민재가"처럼 이름 뒤에 조사가 붙은 경우까지 인식해 개인 가감 표현을
+      // 품목으로 잘못 인식하지 않도록 한다.
+      if (members.some(name => m[1].startsWith(name))) continue;
+      items.push({ name: m[1], price: Number(m[2].replace(/,/g, '')) });
+    }
+
+    if (items.length >= 2) {
+      const total = items.reduce((a, it) => a + it.price, 0);
+      return { mode: 'ITEM', itemName: '여러 품목', items: items.map(it => ({ ...it, participants: [...participants] })), participants, total, raw };
+    }
+
+    const total = this.parseWon(raw);
+
+    // 비율(%) 언급
+    const ratios = {};
+    let hasRatio = false;
+    members.forEach(name => {
+      const pctMatch = raw.match(new RegExp(`${name}[\\s\\S]{0,15}?([0-9]+)\\s*%`));
+      if (pctMatch) { ratios[name] = Number(pctMatch[1]); hasRatio = true; }
+    });
+    if (hasRatio) {
+      const named = Object.keys(ratios);
+      const namedSum = named.reduce((a, k) => a + ratios[k], 0);
+      const rest = participants.filter(name => !named.includes(name));
+      const restEach = rest.length ? Math.max(0, (100 - namedSum)) / rest.length : 0;
+      rest.forEach(name => { ratios[name] = restEach; });
+      return { mode: 'RATIO', itemName: '정산', total, ratios, participants, raw };
+    }
+
+    // 차감/추가 언급 ("OOO원 적게/덜", "OOO원 더/많이") — 이름과 금액 사이에
+    // 한국어 수식어가 섞여도 인식하도록 gap은 한글 포함 임의 문자로 허용한다.
+    const adjustments = {};
+    let hasAdjust = false;
+    members.forEach(name => {
+      const lessMatch = raw.match(new RegExp(`${name}[\\s\\S]{0,15}?([0-9][0-9,]*)\\s*원[\\s\\S]{0,4}?(적게|덜)`));
+      const moreMatch = raw.match(new RegExp(`${name}[\\s\\S]{0,15}?([0-9][0-9,]*)\\s*원[\\s\\S]{0,4}?(더|많이)`));
+      if (lessMatch) { adjustments[name] = -Number(lessMatch[1].replace(/,/g, '')); hasAdjust = true; }
+      if (moreMatch) { adjustments[name] = Number(moreMatch[1].replace(/,/g, '')); hasAdjust = true; }
+    });
+    if (hasAdjust) return { mode: 'ADJUST', itemName: '정산', total, adjustments, participants, raw };
+
+    const itemName = items.length === 1 ? items[0].name : '정산';
+    return { mode: 'EQUAL', itemName, total, participants, raw };
+  }
 
   // auth
   submitAuth = () => {
@@ -812,21 +923,60 @@ class Component extends DCLogic {
   // group chat
   sendGchat = () => {
     const t = this.state.gchatInput.trim(); if (!t) return; const id = this.state.gchatId;
-    this.setState(s=>({gchatInput:'', groups:s.groups.map(g=>g.id===id?{...g,msgs:[...g.msgs,{from:'진주',text:t}]}:g)}));
-    const total = this.parseWon(t);
+    this.setState(s=>({gchatInput:'', groups:s.groups.map(g=>g.id===id?{...g,msgs:[...g.msgs,{id:'m'+Date.now(), from:'진주', text:t}]}:g)}));
     setTimeout(()=>{
       this.setState(s=>({groups:s.groups.map(g=>{
         if (g.id!==id) return g;
-        if (total>0){
-          let results;
-          try { results = this.calcEqual(g.members, total); } catch (err) { return g; }
-          const shares = g.members.map(m => results.find(r=>r.name===m).amount);
-          return {...g, shares, approvals:g.members.map((_,i)=>i===0), status:'승인 대기', msgs:[...g.msgs,{from:'sys',text:`Pie가 총 ${this.won(total)}을 ${g.members.length}명 균등 분담으로 계산했어요 · 1인 약 ${this.won(Math.round(total/g.members.length))}. 멤버들에게 승인 요청을 보냈어요.`}]}; }
-        const other = g.members.filter(x=>x!=='진주'); const who = other[Math.floor(Math.random()*other.length)];
-        const lines = ['확인했어!','좋아, 승인할게','영수증 사진도 올려줘','나 이번 주말 괜찮아'];
-        return {...g, msgs:[...g.msgs,{from:who,text:lines[Math.floor(Math.random()*lines.length)]}]};
+        // Stage 1(AI 해석) — 여기서는 이해만 하고, 실제 금액 계산은 절대 하지 않는다.
+        const parsed = this.parseSettlementText(t, g.members);
+        const itemsTotal = parsed.mode==='ITEM' ? (parsed.items||[]).reduce((a,it)=>a+it.price,0) : parsed.total;
+        if (!itemsTotal || itemsTotal<=0) {
+          return {...g, msgs:[...g.msgs,{id:'m'+Date.now(), from:'sys', text:'금액을 잘 이해하지 못했어요. 예: "삼겹살 35,900원 다같이 나눠줘"처럼 품목과 총액을 함께 말씀해 주세요.'}]};
+        }
+        if (!parsed.participants || parsed.participants.length===0) {
+          return {...g, msgs:[...g.msgs,{id:'m'+Date.now(), from:'sys', text:'나눠 낼 사람이 없어요. 다시 한 번 말씀해 주세요.'}]};
+        }
+        // 계산 전 확인 카드만 띄운다 — 실제 계산(Stage2)은 사용자가 확인을 눌러야 실행된다.
+        return {...g, msgs:[...g.msgs,{id:'m'+Date.now(), from:'sys', kind:'confirm', confirmData:{...parsed, total:itemsTotal}, resolved:false}]};
       })}));
-    }, 1000);
+    }, 900);
+  };
+  // 사용자가 확인 카드에서 "확인·정산 시작"을 눌렀을 때 — 여기서만 실제 계산(Stage2, 코드 전용)이 실행된다.
+  confirmSettlement = (groupId, msgId) => {
+    this.setState(s => {
+      const g = s.groups.find(x=>x.id===groupId); if (!g) return {};
+      const msg = g.msgs.find(m=>m.id===msgId); if (!msg || msg.resolved) return {};
+      const cd = msg.confirmData;
+      let results, total;
+      try {
+        if (cd.mode === 'EQUAL') { results = this.calcEqual(cd.participants, cd.total); total = cd.total; }
+        else if (cd.mode === 'RATIO') { results = this.calcRatio(cd.participants, cd.ratios, cd.total); total = cd.total; }
+        else if (cd.mode === 'ADJUST') { results = this.calcAdjust(cd.participants, cd.adjustments, cd.total); total = cd.total; }
+        else if (cd.mode === 'ITEM') { const r = this.calcItem(cd.participants, cd.items); results = r.results; total = r.total; }
+        else throw new Error('알 수 없는 정산 방식이에요.');
+      } catch (err) {
+        return { groups: s.groups.map(x=>x.id===groupId ? {...x, msgs:[...x.msgs,{id:'m'+Date.now(), from:'sys', text: err.message || '계산 중 문제가 생겼어요. 다시 설명해 주세요.'}]} : x) };
+      }
+      // participants가 members의 부분집합일 수 있으므로, 빠진 멤버는 0원으로 채운다 (방어적 처리)
+      const shares = g.members.map(m => { const r = results.find(x=>x.name===m); return r ? r.amount : 0; });
+      const approvals = g.members.map(m => m===this.me);
+      return {
+        groups: s.groups.map(x=>x.id===groupId ? {
+          ...x, shares, approvals, status:'승인 대기',
+          msgs: x.msgs.map(m=>m.id===msgId?{...m,resolved:true,accepted:true}:m)
+            .concat([{id:'m'+Date.now()+1, from:'sys', text:`정산을 시작했어요 · 총 ${this.won(total)}. 멤버들에게 승인 요청을 보냈어요.`}])
+        } : x)
+      };
+    });
+  };
+  cancelSettlement = (groupId, msgId) => {
+    this.setState(s => ({
+      groups: s.groups.map(x=>x.id===groupId ? {
+        ...x,
+        msgs: x.msgs.map(m=>m.id===msgId?{...m,resolved:true,accepted:false}:m)
+          .concat([{id:'m'+Date.now(), from:'sys', text:'알겠어요, 정산 조건을 다시 설명해 주세요.'}])
+      } : x)
+    }));
   };
 
   // products / groups
@@ -844,7 +994,7 @@ p.joined += 1; this.setState(s=>({joinedIds:[...(s.joinedIds||[]), pid]})); cons
     this.setState(s=>({groups:[g,...s.groups], sheet:null, overlay:null, tab:'group', openGroup:id}));
     this.showToast('공동구매 참여 완료 · 정산방이 만들어졌어요');
   };
-  openCreate = (name, split) => this.setState({sheet:'create', newGroupName:name||'', newMembers: split? split.map(r=>r[0]).filter(x=>x!=='진주') : ['진우','민재','지현'], prefill: split||null, newMode:'EQUAL', newTotalInput:'', newRatios:{}, newItems:[], friendSearchQ:''});
+  openCreate = (name, split) => this.setState({sheet:'create', newGroupName:name||'', newMembers: split? split.map(r=>r[0]).filter(x=>x!=='진주') : ['진우','민재','지현'], prefill: split||null, friendSearchQ:''});
   openFriendSearch = () => this.setState({sheet:'friendSearch', friendSearchQ:''});
   closeFriendSearch = () => this.setState({sheet:'create'});
   generateInviteLink = () => {
@@ -856,72 +1006,52 @@ p.joined += 1; this.setState(s=>({joinedIds:[...(s.joinedIds||[]), pid]})); cons
     }
     this.showToast('초대 링크를 만들어 복사했어요');
   };
-  // 정산 방식(균등/비율/항목) 전환. 처음 전환할 때만 편집하기 편하도록 기본값을 채워준다.
-  setNewMode = (mode) => this.setState(s => {
-    const members = ['진주', ...s.newMembers];
-    const patch = { newMode: mode };
-    if (mode === 'RATIO' && Object.keys(s.newRatios || {}).length === 0) {
-      const eq = Math.round(100 / members.length);
-      const ratios = {}; members.forEach(m => ratios[m] = eq);
-      patch.newRatios = ratios;
-    }
-    if (mode === 'ITEM' && (!s.newItems || s.newItems.length === 0)) {
-      patch.newItems = [{ name: '', price: '', participants: [...members] }];
-    }
-    return patch;
-  });
-  updateItemField(idx, field){ return e => this.setState(s => { const items=[...s.newItems]; items[idx]={...items[idx], [field]: e.target.value}; return {newItems:items}; }); }
-  addItemRow = () => this.setState(s => ({ newItems: [...(s.newItems||[]), { name:'', price:'', participants:['진주', ...s.newMembers] }] }));
-  removeItemRow = (idx) => this.setState(s => ({ newItems: s.newItems.filter((_,i)=>i!==idx) }));
-  toggleItemParticipant(idx, name){ return () => this.setState(s => { const items=[...s.newItems]; const cur=items[idx].participants||[]; items[idx]={...items[idx], participants: cur.includes(name)?cur.filter(x=>x!==name):[...cur,name]}; return {newItems:items}; }); }
+  // 프로필 사진 업로드: 파일을 바로 데이터 URL로 읽어 미리보기(draftAvatar)에만 반영하고,
+  // "완료"를 눌러야 avatarUrl로 실제 반영된다(이름 수정과 동일한 draft → save 패턴).
+  onAvatarFile = (e) => {
+    const file = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) return this.showToast('이미지 파일만 올릴 수 있어요');
+    if (file.size > 8 * 1024 * 1024) return this.showToast('8MB 이하 사진만 올릴 수 있어요');
+    const reader = new FileReader();
+    reader.onload = () => this.setState({ draftAvatar: reader.result });
+    reader.onerror = () => this.showToast('사진을 불러오지 못했어요');
+    reader.readAsDataURL(file);
+  };
+  resetAvatar = () => this.setState({ draftAvatar: null });
+  openEditField = (field, value) => this.setState({ sheet:'editField', editField:field, editFieldDraft:value });
+  closeEditField = () => this.setState({ sheet:'privacy' });
 
   createGroup = () => {
-    const {newGroupName, newMembers, prefill, newMode, newTotalInput, newRatios, newItems} = this.state;
+    const {newGroupName, newMembers, prefill} = this.state;
     if (!newGroupName.trim()) return this.showToast('그룹 이름을 입력해 주세요');
     if (!newMembers.filter(m=>m!==this.me).length) return this.showToast('함께할 멤버를 1명 이상 선택해 주세요');
     const members = ['진주', ...newMembers]; const id='g'+Date.now();
-    let shares, status='비용 입력 대기', approvals = members.map(()=>false), sysMsg = null;
+    let shares = members.map(()=>0), status='비용 입력 대기', approvals = members.map(()=>false), msgs;
 
-    try {
-      if (prefill) {
-        // AI 공동구매 비교/채팅에서 넘어온 사전 계산 결과. 멤버 구성이 그대로면 그 결과를
-        // 그대로 쓰고, 멤버를 바꿨다면 코드(calcEqual)로 다시 계산한다 — AI가 재계산하지 않는다.
+    if (prefill) {
+      // AI 공동구매 비교/채팅에서 넘어온 사전 계산 결과. 멤버 구성이 그대로면 그 결과를
+      // 그대로 쓰고, 멤버를 바꿨다면 코드(calcEqual)로 다시 계산한다 — AI가 재계산하지 않는다.
+      try {
         const total = prefill.reduce((a,r)=>a+r[1],0);
         const same = members.length===prefill.length && members.every(m=>prefill.some(r=>r[0]===m));
         const results = same ? prefill.map(([name,amount])=>({name,amount})) : this.calcEqual(members, total);
         shares = members.map(m => results.find(r=>r.name===m).amount);
         status='승인 대기'; approvals = members.map((_,i)=>i===0);
-        sysMsg = 'Pie가 계산한 분담액으로 승인 요청을 보냈어요.';
-      } else if (newMode === 'EQUAL') {
-        const total = this.parseAmount(newTotalInput);
-        if (!(total > 0)) return this.showToast('총 금액을 입력해 주세요');
-        const results = this.calcEqual(members, total);
-        shares = members.map(m => results.find(r=>r.name===m).amount);
-        status='승인 대기'; approvals = members.map((_,i)=>i===0);
-        sysMsg = `Pie가 총 ${this.won(total)}을 ${members.length}명 균등 분담으로 계산했어요 · 1인 약 ${this.won(Math.round(total/members.length))}.`;
-      } else if (newMode === 'RATIO') {
-        const total = this.parseAmount(newTotalInput);
-        if (!(total > 0)) return this.showToast('총 금액을 입력해 주세요');
-        const results = this.calcRatio(members, newRatios, total);
-        shares = members.map(m => results.find(r=>r.name===m).amount);
-        status='승인 대기'; approvals = members.map((_,i)=>i===0);
-        sysMsg = `Pie가 총 ${this.won(total)}을 입력하신 비율대로 계산했어요.`;
-      } else if (newMode === 'ITEM') {
-        const validItems = (newItems||[]).filter(it => it.name.trim() && Number(it.price) > 0 && (it.participants||[]).length > 0);
-        if (validItems.length === 0) return this.showToast('품목명·금액·참가자를 모두 입력해 주세요');
-        const { results, total } = this.calcItem(members, validItems);
-        shares = members.map(m => results.find(r=>r.name===m).amount);
-        status='승인 대기'; approvals = members.map((_,i)=>i===0);
-        sysMsg = `Pie가 품목 ${validItems.length}개 · 총 ${this.won(total)}을 항목별로 계산했어요.`;
-      } else {
-        shares = members.map(()=>0);
+        msgs = [{id:'m'+Date.now(), from:'sys', text:'Pie가 계산한 분담액으로 승인 요청을 보냈어요.'}];
+      } catch (err) {
+        return this.showToast(err.message || '정산 계산 중 문제가 생겼어요');
       }
-    } catch (err) {
-      return this.showToast(err.message || '정산 계산 중 문제가 생겼어요. 입력값을 확인해 주세요');
+    } else {
+      // 정산 방식/총 금액은 여기서 미리 받지 않는다. 그룹방에 들어가면 Pie mate가
+      // 채팅으로 조건을 어떻게 말하면 되는지 양식을 안내하고, 자연어 설명을 받아
+      // 해석 → 확인 → 계산(Stage2, 코드 전용) 순서로 진행한다.
+      msgs = [{id:'m'+Date.now(), from:'sys', guide:true}];
     }
 
-    const g = {id,name:newGroupName.trim(),members,shares,approvals,status,msgs:[{from:'sys',text: sysMsg || '그룹이 만들어졌어요. 비용과 분담 조건을 채팅으로 말하면 Pie가 계산해요.'}]};
-    this.setState(s=>({groups:[g,...s.groups], sheet:null, overlay:null, tab:'group', openGroup:id, prefill:null, newMode:'EQUAL', newTotalInput:'', newRatios:{}, newItems:[]}));
+    const g = {id, name:newGroupName.trim(), members, shares, approvals, status, msgs};
+    this.setState(s=>({groups:[g,...s.groups], sheet:null, overlay:null, tab:'group', openGroup:id, prefill:null, friendSearchQ:''}));
     this.showToast('그룹을 만들었어요');
   };
 remind = (id) => {
@@ -964,6 +1094,24 @@ remind = (id) => {
     const s = this.state, won = this.won;
     const prod = (id, i) => { const p=this.P[id]; return {...p, id, priceStr:won(p.price),  per4:won(p.price/4), pct:Math.round(p.joined/p.cap*100)+'%', recruit:`${p.joined}/${p.cap}명`, rankLabel:`HOT ${i+1}`, open:()=>this.openProduct(id)}; };
     const unread = s.notifs.filter(n=>!n.read).length;
+    const profileNickV = (s.draftName||'').trim();
+    const profileNickErr = profileNickV.length < 2 ? '닉네임은 2자 이상 입력해주세요'
+      : profileNickV.length > 12 ? '닉네임은 12자 이하로 입력해주세요'
+      : !/^[가-힣a-zA-Z0-9]+$/.test(profileNickV) ? '한글, 영문, 숫자만 쓸 수 있어요' : '';
+    const editFieldLabelMap = {name:'이름', email:'이메일', phone:'휴대폰 번호'};
+    const editFieldTypeMap = {name:'text', email:'email', phone:'tel'};
+    const editFieldPlaceholderMap = {name:'이름을 입력하세요', email:'이메일을 입력하세요', phone:'010-0000-0000'};
+    const editFieldRaw = (s.editFieldDraft||'').trim();
+    let editFieldErr = '';
+    if (s.editField==='name') {
+      if (editFieldRaw.length<2) editFieldErr='이름은 2자 이상 입력해주세요';
+      else if (editFieldRaw.length>12) editFieldErr='이름은 12자 이하로 입력해주세요';
+      else if (!/^[가-힣a-zA-Z0-9]+$/.test(editFieldRaw)) editFieldErr='한글, 영문, 숫자만 쓸 수 있어요';
+    } else if (s.editField==='email') {
+      if (!/^\S+@\S+\.\S+$/.test(editFieldRaw)) editFieldErr='올바른 이메일 형식이 아니에요';
+    } else if (s.editField==='phone') {
+      if (!/^01[0-9]-?\d{3,4}-?\d{4}$/.test(editFieldRaw)) editFieldErr='올바른 휴대폰 번호 형식이 아니에요';
+    }
     const TABS = [
       ['home','홈','M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z'],
       ['buy','공동구매','M5 8h14l-1.2 12.1a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9zM9 8V6.5a3 3 0 0 1 6 0V8'],
@@ -990,7 +1138,37 @@ remind = (id) => {
     });
     const gcG = s.groups.find(g=>g.id===s.gchatId);
     const gc = gcG ? (()=>{const ap=gcG.approvals.filter(Boolean).length, t=gcG.shares.reduce((a,b)=>a+b,0); return {name:gcG.name, memberStr:gcG.members.join(', '), status:gcG.status, totalStr:t?won(t):'금액 입력 전', approvedStr:`· ${ap}/${gcG.members.length}명 승인`, pct:Math.round(ap/gcG.members.length*100)+'%'};})() : {};
-    const gcMsgs = gcG ? gcG.msgs.map(m=>({...m,isSys:m.from==='sys',isMe:m.from==='진주',isOther:m.from!=='sys'&&m.from!=='진주',bg:this.TINT[m.from]||'#EAE0D2'})) : [];
+    const gcMsgs = gcG ? gcG.msgs.map(m=>{
+      const isConfirm = m.kind==='confirm';
+      const base = {...m,
+        isSys: m.from==='sys' && !isConfirm && !m.guide,
+        isMe: m.from==='진주',
+        isOther: m.from!=='sys' && m.from!=='진주',
+        isGuide: !!m.guide,
+        isConfirm,
+        bg:this.TINT[m.from]||'#EAE0D2'};
+      if (!isConfirm) return base;
+      const cd = m.confirmData || {};
+      const modeLabel = {EQUAL:'균등 분배', RATIO:'비율 분배', ADJUST:'차등 분배', ITEM:'항목별 분배'}[cd.mode] || cd.mode;
+      let detailLines = [];
+      if (cd.mode==='RATIO') detailLines = Object.entries(cd.ratios||{}).map(([n,p])=>`${n} ${Math.round(p)}%`);
+      if (cd.mode==='ADJUST') detailLines = Object.entries(cd.adjustments||{}).map(([n,d])=>`${n} ${d>0?'+':''}${won(d)}`);
+      if (cd.mode==='ITEM') detailLines = (cd.items||[]).map(it=>`${it.name} ${won(it.price)}`);
+      return {...base,
+        confirmItemName: cd.itemName || '정산',
+        confirmTotal: won(cd.total||0),
+        confirmParticipants: (cd.participants||[]).join(', '),
+        confirmModeLabel: modeLabel,
+        confirmDetailLines: detailLines,
+        hasConfirmDetail: detailLines.length>0,
+        confirmPending: !m.resolved,
+        confirmResolved: !!m.resolved,
+        confirmStatusText: m.resolved ? (m.accepted?'확인 완료 · 정산을 시작했어요':'취소됨 · 다시 설명해 주세요') : '',
+        confirmStatusColor: m.accepted ? '#2F6B45' : '#A8481A',
+        onConfirmYes: ()=>this.confirmSettlement(gcG.id, m.id),
+        onConfirmNo: ()=>this.cancelSettlement(gcG.id, m.id),
+      };
+    }) : [];
     const certs = s.docs.filter(d=>d.kind==='cert'), rcpts = s.docs.filter(d=>d.kind==='rcpt');
     const docList = (s.settleSeg==='cert'?certs:rcpts).map(d=>{const t=d.rows.reduce((a,r)=>a+r[1],0), c=d.kind==='cert';
       return {title:d.title, sub:c?`${d.date.slice(0,10)} · ${d.rows.length}명 · 블록 ${d.block}`:`${d.date.slice(0,10)} · ${d.store}`, totalStr:won(t), tag:c?'Web3 검증':'파이페이 결제', tagFg:c?'#2F6B45':'#7A6353',
@@ -1039,12 +1217,13 @@ remind = (id) => {
       segCertBg:s.settleSeg==='cert'?'#FFFCF6':'transparent', segCertFg:s.settleSeg==='cert'?'#2E1D12':'#7A6353',
       segRcptBg:s.settleSeg==='rcpt'?'#FFFCF6':'transparent', segRcptFg:s.settleSeg==='rcpt'?'#2E1D12':'#7A6353',
       docList,
-      initial:s.userName.slice(0,1), userName:s.userName, userEmail:s.userEmail, balanceStr:won(s.balance),
+      initial:s.userName.slice(0,1), userName:s.userName, userEmail:s.userEmail, userAddress:s.userAddress, balanceStr:won(s.balance),
+      hasHeaderAvatar:!!s.avatarUrl, noHeaderAvatar:!s.avatarUrl, headerAvatarUrl:s.avatarUrl||'',
       charge:()=>{this.setState(x=>({balance:x.balance+50000, pay:[{d:this.today(),t:'파이페이 충전',s:'토스뱅크 ****21',a:50000},...x.pay]})); this.showToast('50,000원을 충전했어요');},
-      sendMoney:()=>this.showToast('정산방에서 승인하면 자동으로 송금돼요'),
+      sendMoney:()=>this.showToast('연결 계좌 관리 기능은 준비 중이에요'),
       payList:s.pay.slice(0, s.payVisibleCount).map(h=>({...h, amt:(h.a>0?'+':'')+won(h.a), color:h.a>0?'#2F6B45':'#2E1D12'})),
       hasMorePay:s.pay.length>s.payVisibleCount, loadMorePay:()=>this.setState(x=>({payVisibleCount:x.payVisibleCount+5})),
-      myMenu:[['프로필 수정',()=>this.setState({sheet:'profile',draftName:s.userName})],['개인정보 관리',()=>this.setState({sheet:'privacy'})],['다른 계정으로 로그인',()=>this.ask({title:'다른 계정으로 로그인할까요?',body:'현재 계정에서 로그아웃돼요.',ok:'계속',okBg:'#EE6A26',fn:()=>this.setState({screen:'auth',authMode:'login',email:''})})],['로그아웃',this.logout],['회원 탈퇴',this.withdraw]].map(([label,go])=>({label,go,color:label==='회원 탈퇴'?'#B8401A':'#2E1D12'})),
+      myMenu:[['프로필 수정',()=>this.setState({sheet:'profile',draftName:s.userName,draftAvatar:s.avatarUrl})],['개인정보 관리',()=>this.setState({sheet:'privacy'})],['다른 계정으로 로그인',()=>this.ask({title:'다른 계정으로 로그인할까요?',body:'현재 계정에서 로그아웃돼요.',ok:'계속',okBg:'#EE6A26',fn:()=>this.setState({screen:'auth',authMode:'login',email:''})})],['로그아웃',this.logout],['회원 탈퇴',this.withdraw]].map(([label,go])=>({label,go,color:label==='회원 탈퇴'?'#B8401A':'#2E1D12'})),
       isChat:s.overlay==='chat', isGChat:s.overlay==='gchat', isDoc:s.overlay==='doc', closeOverlay:()=>this.setState({overlay:null}),
       chatTitle:chat?chat.title:'Pie', chatMsgs:chat?chat.msgs.map(mapMsg):[], typing:s.typing, chatRef:this.chatRef,
       chatInput:s.chatInput, onChatInput:e=>this.setState({chatInput:e.target.value}), onChatKey:e=>{if(this.isEnter(e))this.sendChat();}, sendChat:this.sendChat,
@@ -1057,7 +1236,7 @@ remind = (id) => {
       notifList:s.notifs.map((n,i)=>({...n, bg:n.read?'transparent':'#FFFCF6', dot:n.read?'transparent':'#EE6A26', go:()=>{this.setState(x=>({notifs:x.notifs.map((m,j)=>j===i?{...m,read:true}:m)})); this.goNotif(n);}})),
       readAll:()=>this.setState(x=>({notifs:x.notifs.map(n=>({...n,read:true}))})),
       hasSheet:!!s.sheet, closeSheet:()=>this.setState({sheet:null}),
-      isProductSheet:s.sheet==='product', isCreateSheet:s.sheet==='create', isProfileSheet:s.sheet==='profile', isPrivacySheet:s.sheet==='privacy',
+      isProductSheet:s.sheet==='product', isCreateSheet:s.sheet==='create', isProfileSheet:s.sheet==='profile', isPrivacySheet:s.sheet==='privacy', isEditFieldSheet:s.sheet==='editField',
       sp, joinProduct:this.joinProduct, askPieProduct:()=>{const p=this.P[s.productId]; this.setState({sheet:null}); this.startChat(`${p.name}이랑 비슷한 공동구매 4명 기준으로 비교해줘`);},
       newGroupName:s.newGroupName, onNewGroupName:e=>this.setState({newGroupName:e.target.value}), newCount:s.newMembers.length+1,
       openFriendSearch:this.openFriendSearch, closeFriendSearch:this.closeFriendSearch,
@@ -1073,29 +1252,43 @@ remind = (id) => {
       generateInviteLink:this.generateInviteLink, hasInviteLink:!!s.inviteLink, inviteLink:s.inviteLink||'',
       copyInviteLink:()=>{ if(s.inviteLink){ if(typeof navigator!=='undefined'&&navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(s.inviteLink).catch(()=>{}); this.showToast('링크를 복사했어요'); } },
       hasPrefill:!!s.prefill, prefillTotal:s.prefill?won(s.prefill.reduce((a,r)=>a+r[1],0)):'', createGroup:this.createGroup, createBg:s.newGroupName.trim()?'#EE6A26':'#E3C4AE',
-      // 정산 방식 선택(균등/비율/항목) - CLAUDE.md Stage2 원칙에 따라 실제 금액 계산은
-      // 모두 코드(calcEqual/calcRatio/calcItem)가 담당하고, 이 바인딩들은 입력값만 다룬다.
-      showModePicker: !s.prefill,
-      isEqualMode:s.newMode==='EQUAL', isRatioMode:s.newMode==='RATIO', isItemMode:s.newMode==='ITEM',
-      setModeEqual:()=>this.setNewMode('EQUAL'), setModeRatio:()=>this.setNewMode('RATIO'), setModeItem:()=>this.setNewMode('ITEM'),
-      modeEqualBg:s.newMode==='EQUAL'?'#FFFCF6':'transparent', modeEqualFg:s.newMode==='EQUAL'?'#2E1D12':'#7A6353',
-      modeRatioBg:s.newMode==='RATIO'?'#FFFCF6':'transparent', modeRatioFg:s.newMode==='RATIO'?'#2E1D12':'#7A6353',
-      modeItemBg:s.newMode==='ITEM'?'#FFFCF6':'transparent', modeItemFg:s.newMode==='ITEM'?'#2E1D12':'#7A6353',
-      showTotalInput: !s.prefill && (s.newMode==='EQUAL' || s.newMode==='RATIO'),
-      newTotalInput:s.newTotalInput, onNewTotalInput:e=>this.setState({newTotalInput:e.target.value}),
-      ratioMembers: (!s.prefill && s.newMode==='RATIO') ? ['진주', ...s.newMembers].map(m => ({
-        name:m, value:(s.newRatios && s.newRatios[m]!=null) ? s.newRatios[m] : '',
-        onChange:e=>{ const v=e.target.value; this.setState(x=>({newRatios:{...x.newRatios, [m]:v}})); },
-      })) : [],
-      itemRows: (!s.prefill && s.newMode==='ITEM') ? (s.newItems||[]).map((it, idx) => ({
-        idx, name:it.name, onName:this.updateItemField(idx,'name'),
-        price:it.price, onPrice:this.updateItemField(idx,'price'),
-        canRemove:(s.newItems||[]).length>1, remove:()=>this.removeItemRow(idx),
-        participants:['진주', ...s.newMembers].map(m => { const on=(it.participants||[]).includes(m); return {name:m, on, border:on?'#EE6A26':'#EEE1CB', bg:on?'#FCE3D3':'transparent', fg:on?'#A8481A':'#5E4A3B', toggle:this.toggleItemParticipant(idx,m)}; }),
-      })) : [],
-      addItemRow:this.addItemRow,
-      draftName:s.draftName, onDraftName:e=>this.setState({draftName:e.target.value}), saveProfile:()=>{if(s.draftName.trim()){this.setState({userName:s.draftName.trim(),sheet:null}); this.showToast('프로필을 저장했어요');}},
-      privacyRows:[['이름',s.userName],['이메일',s.userEmail],['휴대폰','010-****-2841'],['본인인증','완료 · 2026.03.02']].map(([k,v])=>({k,v})),
+      // 정산 방식/총 금액은 이 화면에서 받지 않는다. 그룹방에 들어가면 Pie mate가
+      // 채팅으로 조건을 어떻게 설명하면 되는지 안내하고, 자연어 해석 → 확인 → 계산(코드 전용) 순으로 진행한다.
+      showChatHint: !s.prefill,
+      draftName:s.draftName, onDraftName:e=>this.setState({draftName:e.target.value}),
+      avatarPreview:s.draftAvatar||'', hasAvatarPreview:!!s.draftAvatar, noAvatarPreview:!s.draftAvatar,
+      avatarInitial:s.userName.slice(0,1), onAvatarFile:this.onAvatarFile, resetAvatar:this.resetAvatar,
+      nickLen:`${s.draftName.trim().length}/12`,
+      nickHelpText:profileNickErr || '2~12자, 한글·영문·숫자만 쓸 수 있어요',
+      nickHelpColor:profileNickErr ? '#B8401A' : '#A8927F',
+      nickBorderColor:profileNickErr ? '#F1B4A8' : '#EEE1CB',
+      saveProfileBg:profileNickErr ? '#E3C4AE' : '#EE6A26',
+      saveProfile:()=>{
+        const v = s.draftName.trim();
+        if (profileNickErr) return this.showToast(profileNickErr);
+        this.setState({userName:v, avatarUrl:s.draftAvatar, sheet:null});
+        this.showToast('프로필을 저장했어요');
+      },
+      privacyRows:[
+        {k:'이메일', v:s.userEmail, editable:true, field:'email'},
+        {k:'휴대폰', v:s.userPhone, editable:true, field:'phone'},
+        {k:'본인인증', v:'완료 · 2026.03.02', editable:false, field:null},
+      ].map(r => ({...r, notEditable:!r.editable, go: r.editable ? ()=>this.openEditField(r.field, r.v) : null})),
+      editFieldLabel: editFieldLabelMap[s.editField] || '',
+      editFieldInputType: editFieldTypeMap[s.editField] || 'text',
+      editFieldPlaceholder: editFieldPlaceholderMap[s.editField] || '',
+      editFieldDraft:s.editFieldDraft, onEditFieldDraft:e=>this.setState({editFieldDraft:e.target.value}),
+      hasEditFieldErr:!!editFieldErr, editFieldErr, editFieldBorderColor: editFieldErr?'#F1B4A8':'#EEE1CB', editFieldSaveBg: editFieldErr?'#E3C4AE':'#EE6A26',
+      closeEditField:this.closeEditField,
+      saveEditField:()=>{
+        if (editFieldErr) return this.showToast(editFieldErr);
+        const patch = {sheet:'privacy'};
+        if (s.editField==='name') patch.userName = editFieldRaw;
+        if (s.editField==='email') patch.userEmail = editFieldRaw;
+        if (s.editField==='phone') patch.userPhone = editFieldRaw;
+        this.setState(patch);
+        this.showToast('변경됐어요');
+      },
       toggleMarketing:()=>this.setState({marketing:!s.marketing}), mkBg:s.marketing?'#EE6A26':'#D9C8AE', mkJustify:s.marketing?'flex-end':'flex-start',
       downloadData:()=>this.showToast('요청을 접수했어요. 이메일로 보내드릴게요'),
       hasConfirm:!!s.confirm, confirm:s.confirm||{}, cancelConfirm:()=>this.setState({confirm:null}), okConfirm:()=>{const f=s.confirm&&s.confirm.fn; this.setState({confirm:null}); f&&f();},
